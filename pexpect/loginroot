@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+
+import pexpect
+
+
+def readPw(file):
+	f = open(file)
+	pw = f.read()
+	f.close()
+	return pw
+
+def login(su, pw):
+	try:
+		child = pexpect.spawn(su)
+		child.expect([pexpect.TIMEOUT, '.*assword:'])
+		child.sendline(pw)
+		child.expect([pexpect.TIMEOUT, '#|$'])
+		child.setwinsize(50,200)
+		child.interact()
+		child.close()
+	except :
+		return False
+	return True
+
+if __name__ == "__main__" :
+	pw = readPw("su")
+	login("su", pw)
