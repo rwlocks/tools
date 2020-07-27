@@ -1,0 +1,56 @@
+recordFile="${HOME}/record"
+res=()
+maxlen=5
+
+if [ ! -f "$recordFile" ]; then
+    touch "$recordFile"
+fi
+
+j=0
+while read line
+do
+    res[$j]=$line
+    let j++
+    if [ $j -ge $maxlen ]; then
+        break
+    fi
+done < $recordFile
+
+function writeFile(){
+    > $recordFile
+    for e in ${res[*]};do
+        echo $e >> $recordFile
+    done    
+}
+
+if [ -n "$1" ]; then
+    if [ $1 == "-j" ]; then
+        for(( i=0;i<${#res[@]};i++)) do
+            echo "$i ${res[$i]}"
+        done
+        echo -n 'choose number: '
+        read target
+        cd ${res[$target]}
+        return
+    fi
+
+    path=$(readlink -f "$1")
+    if [ ! -d "$path" ]; then
+        echo "input wrong path: $path"
+        return
+    fi
+
+    len=${#res[@]}
+    echo $path
+    while [ $len -gt 0 ];do
+        res[$len]=${res[$len - 1]}
+        let len--
+    done
+
+    res[0]=$path
+    writeFile
+else
+    for(( i=0;i<${#res[@]};i++)) do
+        echo "$i ${res[$i]}"
+    done
+fi
